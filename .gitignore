@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+.github-pending/
+__pycache__/
+*.pyc
+.DS_Store
+agentcore/.cli/
+node_modules/
+*.log
+!outcomes.log

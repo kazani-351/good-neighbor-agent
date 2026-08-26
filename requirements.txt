@@ -1,0 +1,5 @@
+strands-agents>=1.0.0
+strands-agents-tools>=0.2.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+resend>=2.0.0

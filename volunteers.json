@@ -1,0 +1,23 @@
+[
+  {
+    "id": "v1",
+    "name": "Asha",
+    "email": "asha@example.org",
+    "skills": ["reading", "labels", "navigation"],
+    "available": true
+  },
+  {
+    "id": "v2",
+    "name": "Rohit",
+    "email": "rohit@example.org",
+    "skills": ["reading", "forms", "tech-support"],
+    "available": true
+  },
+  {
+    "id": "v3",
+    "name": "Meera",
+    "email": "meera@example.org",
+    "skills": ["navigation", "errands"],
+    "available": false
+  }
+]
