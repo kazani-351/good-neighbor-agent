@@ -18,8 +18,40 @@ autonomously.
 
 ## Status
 
-`[UNVERIFIED]` — scaffolded, not yet run. Core agent loop works locally with a stub
-in-memory roster; AWS deploy (AgentCore Runtime) and real notification (SES) not wired yet.
+Phase 1 complete and verified: direct-answer, volunteer routing (real email via Resend),
+autonomous escalation-on-timeout (live GitHub Actions cron), and safety-critical escalation
+have all been proven with real runs against real services.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    R["Requester\n(text + optional photo)"] --> A
+
+    subgraph Agent["Agent request loop (Strands + thegrid.ai agent-prime)"]
+        A{"Can answer\ndirectly & safely?"}
+        A -- yes --> D["Answer directly"]
+        A -- no --> FV["find_volunteer(skill)"]
+        FV -- match found --> NV["notify_volunteer\n(Resend email)"]
+        FV -- no match / safety-critical --> ESC["escalate\n(Resend email to coordinator)"]
+        NV --> P[("pending.json\nrequest marked pending")]
+        D --> LOG
+        NV --> LOG["log_outcome\n(outcomes.log)"]
+        ESC --> LOG
+    end
+
+    subgraph CI["Background lane — GitHub Actions, cron every 5 min"]
+        CRON["escalation_check.py\n(deterministic, no LLM)"] -- reads --> P
+        CRON -- overdue pending --> ESC2["escalate\n(Resend email to coordinator)"]
+        ESC2 --> COMMIT["commit pending.json / outcomes.log\nback to repo (CI runners are ephemeral)"]
+    end
+
+    P -.->|checked by| CRON
+```
+
+Two lanes: the synchronous agent loop handles each request as it comes in; a separate
+scheduled job (no LLM involved) sweeps `pending.json` for anything that timed out
+(`ESCALATION_TIMEOUT_MINUTES`, default 10) and escalates it on its own.
 
 ## Stack
 
@@ -48,10 +80,15 @@ python -m app.good_neighbor_agent.agent
 ```
 app/good_neighbor_agent/
 ├── __init__.py
-├── agent.py       # agent definition + entrypoint
-├── tools.py        # find_volunteer, notify_volunteer, escalate, log_outcome
-└── roster.py        # stub in-memory volunteer roster (JSON-backed for local dev)
-volunteers.json       # seed data
+├── agent.py             # agent definition + entrypoint
+├── tools.py             # find_volunteer, notify_volunteer, escalate, log_outcome
+├── roster.py            # volunteer roster (JSON-backed), overrides matched email with DEMO_INBOX
+├── pending.py           # tracks requests awaiting a volunteer response
+└── escalation_check.py  # standalone timeout sweep, no LLM — run by the cron below
+volunteers.json          # seed data
+pending.json             # request state (committed back to repo by CI — see workflow below)
+outcomes.log             # log_outcome history
+.github/workflows/escalation-check.yml  # cron every 5 min, runs escalation_check.py
 ```
 
 ## License
