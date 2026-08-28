@@ -2,6 +2,15 @@
 
 Built for the [Agents for Humans Hackathon](https://agentsforhumans.devpost.com/) (AWS/Devpost) — **Good Neighbor Agents** track.
 
+## Demo video
+
+[![Demo video](demo/thumbnail.png)](https://github.com/kazani-351/good-neighbor-agent/blob/main/demo/good-neighbor-agent-demo.mp4)
+
+5 minutes, narrated. Every agent-behavior segment is a real captured run against real
+thegrid.ai and Resend calls — not staged. Click the thumbnail to watch (GitHub plays it
+inline on the file page), or go straight to
+[demo/good-neighbor-agent-demo.mp4](demo/good-neighbor-agent-demo.mp4).
+
 ## What it does
 
 Coordinates accessibility requests for a volunteer network. A requester submits a task in
