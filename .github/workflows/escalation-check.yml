@@ -1,0 +1,39 @@
+name: Escalation Check
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run escalation check
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DEMO_INBOX: ${{ secrets.DEMO_INBOX }}
+          ESCALATION_TIMEOUT_MINUTES: "10"
+        run: python -m app.good_neighbor_agent.escalation_check
+
+      # CI runners are ephemeral — pending.json/outcomes.log only persist across
+      # runs if state changes get committed back to the repo. See implementation-notes.md
+      # for why this pattern was chosen over a real datastore for the hackathon scope.
+      - name: Commit state changes, if any
+        run: |
+          git config user.name "good-neighbor-agent-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add pending.json outcomes.log
+          git diff --cached --quiet || git commit -m "chore: escalation check state update [skip ci]"
+          git push
