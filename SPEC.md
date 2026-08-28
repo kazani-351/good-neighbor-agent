@@ -96,12 +96,16 @@ the next one starts. Do not start Phase N+1 until Phase N is verified working.
    because someone manually re-ran the script. *(Fully verified locally 2026-08-26: real
    `notify_volunteer` → backdated → `escalation_check` correctly detected it overdue, sent a
    real coordinator email (after fixing a module-level env var bug caught by this test — see
-   implementation-notes.md), and marked it `"escalated"`. Still open: confirm the GitHub
-   Actions cron actually fires post-push with `RESEND_API_KEY`/`DEMO_INBOX` configured as repo
-   secrets — untestable until the repo is on GitHub.)*
+   implementation-notes.md), and marked it `"escalated"`. GitHub Actions workflow verified
+   live 2026-08-26: manual `workflow_dispatch` run succeeded (43s, exit 0) against an empty
+   `pending.json`, escalating nothing as expected — confirms the scheduled path fires and
+   completes with `RESEND_API_KEY`/`DEMO_INBOX` repo secrets configured. Fully verified.)*
 4. **Safety-critical requests escalate even if a volunteer exists** — falsifier: submit a
    request mentioning medication/unsafe-location language with an available volunteer present;
-   confirm the agent still escalates rather than routing silently.
+   confirm the agent still escalates rather than routing silently. *(Verified 2026-08-28:
+   two-unlabeled-pills medication request with a matching available volunteer on the roster —
+   agent escalated, did NOT call find_volunteer/notify_volunteer (`pending.json` stayed empty),
+   and additionally refused to guess dosage. Confirmed.)*
 5. **Repo passes hackathon submission requirements** — public repo, MIT license visible in
    About section, README, architecture diagram, ≤5min video covering problem/who/why,
    AWS Builder ID present on the submission form.

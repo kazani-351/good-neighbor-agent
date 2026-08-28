@@ -49,3 +49,10 @@
   ephemeral CI runs — see Architecture in SPEC.md). Caught before the first push by previewing
   `git add -n .` and noticing the file missing from the list, not by assuming it would work.
   Fixed with a targeted `!outcomes.log` exception, same pattern already used for `.env.example`.
+
+- **2026-08-26 — Node 20 deprecation warning on the Actions workflow — benign, not fixed.**
+  The live run surfaces one warning: `actions/checkout@v4` and `actions/setup-python@v5`
+  target Node.js 20, which GitHub is deprecating, so the runner forces them onto Node 24.
+  It's a warning, not a failure — the run succeeds. Deliberately NOT speculatively bumping
+  action versions (no verified newer major to bump to without checking) — the action
+  maintainers will update their runtimes. Revisit only if it becomes a hard failure.
